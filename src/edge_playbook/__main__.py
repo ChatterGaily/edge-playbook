@@ -27,10 +27,10 @@ class play_mp3 (threading.Thread):
         while not (self.need_stop_play and self.buffer1 == "" and self.buffer2 == "") :
             if switcher_of_2play == 0:
                 buffer1Lock.acquire()
-                print(self.buffer1, end="")
+                print('\033[32m' + self.buffer1, end="")
                 if sys.platform == "win32" and not use_mpv:
                     # pylint: disable-next=import-outside-toplevel
-                    # from .win32_playback import play_mp3_win32
+                    from .win32_playback import play_mp3_win32
                     play_mp3_win32(self.mp3_fname1)
                 else:
                     with subprocess.Popen(
@@ -49,7 +49,7 @@ class play_mp3 (threading.Thread):
             else:
                 buffer2Lock.acquire()
                 buffer1_wait_Lock.release()
-                print(self.buffer2, end="")
+                print('\033[34m' + self.buffer2, end="")
                 if sys.platform == "win32" and not use_mpv:
                     # pylint: disable-next=import-outside-toplevel
                     # from .win32_playback import play_mp3_win32
@@ -158,7 +158,7 @@ def _main() -> None:
             switcher_of_2play = True
             line_buffer1 = ""
             line_buffer2 = ""
-            with open(args.file, "r") as file:
+            with open(args.file, "r", encoding="utf-8") as file:
                 for line in file:
                     if switcher_of_2play:
                         line_buffer1 += line
