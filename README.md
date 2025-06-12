@@ -3,8 +3,12 @@
 `edge-tts` is a Python module that allows you to use Microsoft Edge's online text-to-speech service from within your Python code or using the provided `edge-tts` or `edge-playback` command.
 
 ## Installation
-
 To install it, run the following command:
+
+    $ pushd $HOME/.local && git clone https://github.com/ChatterGaily/edge-playbook.git && pushd $HOME/.local/edge-playbook && python -m venv venv && source venv/bin/active && pip install -e .
+
+
+Or run the following command:
 
     $ pip install edge-tts
 
@@ -20,9 +24,10 @@ If you want to use the `edge-tts` command, you can simply run it with the follow
 
     $ edge-tts --text "Hello, world!" --write-media hello.mp3 --write-subtitles hello.srt
 
-If you wish to play it back immediately with subtitles, you could use the `edge-playback` command:
+If you wish to play it back immediately with subtitles, you could use the `edge-playback` `edge-playbook` command:
 
     $ edge-playback --text "Hello, world!"
+    $ edge-playbook -v zh-CN-XiaoxiaoNeural -f some_ebook.txt
 
 Note that `edge-playback` requires the installation of the [`mpv` command line player](https://mpv.io/), except on Windows.
 
