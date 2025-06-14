@@ -98,6 +98,12 @@ def _main() -> None:
         default="",
         help="same as edge-tts --text but read from file",
     )    
+    parser.add_argument(
+        "--line",
+        type=str,
+        default="1",
+        help="from the line number start play",
+    )       
     args, tts_args = parser.parse_known_args()
 
     use_mpv = sys.platform != "win32" or args.mpv
@@ -158,51 +164,60 @@ def _main() -> None:
             switcher_of_2play = True
             line_buffer1 = ""
             line_buffer2 = ""
+
+            start_line = 1
+            if int(args.line) > 1:
+                start_line = int(args.line)
+            line_counter = 1
+
             with open(args.file, "r", encoding="utf-8") as file:
                 for line in file:
-                    if switcher_of_2play:
-                        line_buffer1 += line
-                        if len(line_buffer1) > 200:
-                            edge_tts_cmd1 = ["edge-tts"]
-                            edge_tts_cmd1 = edge_tts_cmd1 + tts_args
-                            edge_tts_cmd1.append(f"--write-media={mp3_fname1}")
-                            if srt_fname:
-                                edge_tts_cmd1.append(f"--write-subtitles={srt_fname1}")
-                            edge_tts_cmd1.append(f"--text={line_buffer1}")
-                            buffer1Lock.acquire()
-                            with subprocess.Popen(edge_tts_cmd1) as process:
-                                process.communicate()
-                            # print(line_buffer1)
-                            mp3_player.set_buffer1(line_buffer1)
-                            buffer1Lock.release()
-                            line_buffer1 = ""    
-                            switcher_of_2play = False
-                            if mp3_player_need_init:
-                                mp3_player.start()
-                                mp3_player_need_init = False
-                            buffer1_wait_Lock.acquire()
-                            buffer1_wait_Lock.release()
-       
-                    else:
-                        line_buffer2 += line
-                        if len(line_buffer2) > 200:
-                            edge_tts_cmd2 = ["edge-tts"]
-                            edge_tts_cmd2 = edge_tts_cmd2 + tts_args
-                            edge_tts_cmd2.append(f"--write-media={mp3_fname2}")
-                            if srt_fname:
-                                edge_tts_cmd2.append(f"--write-subtitles={srt_fname2}")
-                            edge_tts_cmd2.append(f"--text={line_buffer2}")
-                            buffer2Lock.acquire()
-                            with subprocess.Popen(edge_tts_cmd2) as process:
-                                process.communicate()
-                            # print(line_buffer2)
-                            mp3_player.set_buffer2(line_buffer2)
-                            buffer2Lock.release()
-                            line_echo = ""
-                            line_buffer2 = ""          
-                            switcher_of_2play = True   
-            mp3_player.set_stop_play()
-            mp3_player.join()    
+                    line_counter = line_counter + 1
+                    if line_counter >= start_line:
+                        if switcher_of_2play:
+                            line_buffer1 += line
+                            if len(line_buffer1) > 200:
+                                edge_tts_cmd1 = ["edge-tts"]
+                                edge_tts_cmd1 = edge_tts_cmd1 + tts_args
+                                edge_tts_cmd1.append(f"--write-media={mp3_fname1}")
+                                if srt_fname:
+                                    edge_tts_cmd1.append(f"--write-subtitles={srt_fname1}")
+                                edge_tts_cmd1.append(f"--text={line_buffer1}")
+                                buffer1Lock.acquire()
+                                with subprocess.Popen(edge_tts_cmd1) as process:
+                                    process.communicate()
+                                # print(line_buffer1)
+                                mp3_player.set_buffer1(line_buffer1)
+                                buffer1Lock.release()
+                                line_buffer1 = ""    
+                                switcher_of_2play = False
+                                if mp3_player_need_init:
+                                    mp3_player.start()
+                                    mp3_player_need_init = False
+                                buffer1_wait_Lock.acquire()
+                                buffer1_wait_Lock.release()
+           
+                        else:
+                            line_buffer2 += line
+                            if len(line_buffer2) > 200:
+                                edge_tts_cmd2 = ["edge-tts"]
+                                edge_tts_cmd2 = edge_tts_cmd2 + tts_args
+                                edge_tts_cmd2.append(f"--write-media={mp3_fname2}")
+                                if srt_fname:
+                                    edge_tts_cmd2.append(f"--write-subtitles={srt_fname2}")
+                                edge_tts_cmd2.append(f"--text={line_buffer2}")
+                                buffer2Lock.acquire()
+                                with subprocess.Popen(edge_tts_cmd2) as process:
+                                    process.communicate()
+                                # print(line_buffer2)
+                                mp3_player.set_buffer2(line_buffer2)
+                                buffer2Lock.release()
+                                line_echo = ""
+                                line_buffer2 = ""          
+                                switcher_of_2play = True   
+            if line_counter >= start_line:
+                mp3_player.set_stop_play()
+                mp3_player.join()    
 
         else:
             with subprocess.Popen(edge_tts_cmd) as process:
